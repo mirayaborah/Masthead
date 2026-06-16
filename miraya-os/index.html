@@ -340,6 +340,36 @@
   .tt-legend { display: flex; flex-wrap: wrap; gap: 12px 16px; justify-content: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
   .tt-leg { display: inline-flex; align-items: center; gap: 6px; font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--ink-soft); }
   .tt-leg .sw { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  /* timetable editor */
+  .tt-head-right { display: inline-flex; align-items: center; gap: 12px; }
+  .tt-edit-btn { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--mag); background: var(--mag-soft); border: 1px solid var(--mag); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .tt-edit-btn.on { background: var(--mag); color: #fff; }
+  .tt-editor { margin-top: 16px; }
+  /* calendar-style edit mode */
+  .tt.editing .tt-block, .tt.editing .tt-meal { cursor: grab; touch-action: none; }
+  .tt-block.dragging, .tt-meal.dragging { opacity: 0.92; z-index: 20; box-shadow: 0 8px 22px rgba(0,0,0,0.3); cursor: grabbing; }
+  .tt-resize { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; cursor: ns-resize; }
+  .tt-resize::after { content: ""; position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); width: 22px; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.75); }
+  .tt-meal .tt-resize::after { background: rgba(28,26,23,0.4); }
+  .tt-edit-hint { font-family: var(--sans); font-size: 11.5px; font-weight: 500; color: var(--ink-faint); text-align: center; margin-top: 4px; line-height: 1.55; }
+  .tt-reset-all { display: block; margin: 14px auto 0; font-family: var(--sans); font-size: 11px; font-weight: 700; color: var(--ink-soft); background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+  /* edit card / modal */
+  .tt-modal { position: fixed; inset: 0; background: rgba(20,16,14,0.45); display: flex; align-items: flex-end; justify-content: center; z-index: 1000; padding: 0; }
+  @media (min-width: 600px) { .tt-modal { align-items: center; padding: 16px; } }
+  .tt-card { background: var(--paper-2); border-radius: 18px 18px 0 0; width: 100%; max-width: 440px; padding: 22px 20px 24px; box-shadow: 0 -8px 40px rgba(0,0,0,0.3); }
+  @media (min-width: 600px) { .tt-card { border-radius: 16px; } }
+  .tt-card .fld { width: 100%; box-sizing: border-box; margin-bottom: 12px; }
+  .tt-card-times { display: flex; gap: 12px; margin-bottom: 12px; }
+  .tt-card-times label, .tt-card-daywrap label { flex: 1; font-family: var(--sans); font-size: 10.5px; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.05em; text-transform: uppercase; display: flex; flex-direction: column; gap: 6px; }
+  .tt-card-times input, .tt-card select { font-family: var(--sans); font-size: 14px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px; width: 100%; box-sizing: border-box; }
+  .tt-card-daywrap { margin-bottom: 16px; }
+  .tt-card-cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .tt-cat-pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--ink-soft); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; cursor: pointer; }
+  .tt-cat-pill.on { border-color: var(--ink); color: var(--ink); background: #fff; }
+  .tt-cat-pill .dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+  .tt-card-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .tt-card-del { font-family: var(--sans); font-size: 13px; font-weight: 700; color: #b3344c; background: transparent; border: none; cursor: pointer; padding: 8px 2px; }
+  .tt-card-done { font-family: var(--sans); font-size: 14px; font-weight: 700; color: #fff; background: var(--mag); border: none; border-radius: 11px; padding: 11px 28px; cursor: pointer; }
 
   footer.colophon { margin-top: 50px; padding-top: 18px; text-align: center; border-top: 1px solid var(--line); font-family: var(--sans); font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); display: flex; justify-content: center; gap: 8px 18px; flex-wrap: wrap; align-items: center; }
   footer.colophon button { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); text-decoration: underline; text-underline-offset: 3px; }
@@ -390,8 +420,9 @@
 
   <!-- ===== THE WEEK (timetable) ===== -->
   <section class="panel" id="ttPanel">
-    <div class="eyebrow"><span>The Week &middot; Your Routine</span><span class="meta" id="ttNow">—</span></div>
+    <div class="eyebrow"><span>The Week &middot; Your Routine</span><span class=" tt-head-right"><button type="button" class="tt-edit-btn" id="ttEditBtn">Edit</button><span class="meta" id="ttNow">—</span></span></div>
     <div class="tt-scroll"><div class="tt" id="tt"></div></div>
+    <div class="tt-editor" id="ttEditor" style="display:none"></div>
     <div class="tt-foot">Wind down for sleep &middot; 11pm&ndash;midnight</div>
     <div class="tt-legend" id="ttLegend"></div>
   </section>
@@ -488,6 +519,7 @@
       order: { items: [], checks: {}, schedule: "" }, // checks[day] = {itemId:bool}
       todos: [],           // {id, text, done, due, createdAt}
       events: {},          // events[day] = [{id, text}]
+      timetable: null,     // null = use built-in default; else array of 7 day-arrays of blocks
       openAct: null
     };
   }
@@ -506,6 +538,7 @@
         base.make = Object.assign(base.make, s.make || {});
         base.todos = s.todos || [];
         base.events = s.events || {};
+        base.timetable = s.timetable || null;
         base.order = Object.assign(base.order, s.order || {});
         base.openAct = s.openAct || null;
       }
@@ -1168,8 +1201,11 @@
   ];
   function todayCol() { return (new Date().getDay() + 6) % 7; }  // Mon=0 … Sun=6
 
+  function getSched() { return state.timetable || TT_SCHED; }
+
   function buildTimetable() {
     var names = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    var sched = getSched();
     var tc = todayCol();
     var todayDate = new Date().toLocaleDateString(undefined, { day: "numeric", month: "short" });
     var html = '<div class="tt-corner"></div>';
@@ -1181,14 +1217,17 @@
     html += '</div>';
     html += '<div class="tt-body" style="height:' + TT_H + 'px">';
     for (var d = 0; d < 7; d++) {
-      html += '<div class="tt-col' + (d === tc ? " today" : "") + '" style="height:' + TT_H + 'px">';
-      TT_SCHED[d].forEach(function (b) {
+      html += '<div class="tt-col' + (d === tc ? " today" : "") + '" data-day="' + d + '" style="height:' + TT_H + 'px">';
+      sched[d].forEach(function (b, idx) {
         var top = (b[0] - TT_START) * PPH, ht = (b[1] - b[0]) * PPH;
+        var drag = (ttGesture && b === ttGesture.block) ? " dragging" : "";
+        var attrs = ttEditing ? ' data-day="' + d + '" data-idx="' + idx + '"' : "";
+        var rsz = ttEditing ? '<div class="tt-resize"></div>' : "";
         if (b[2] === "meal") {
-          html += '<div class="tt-meal" style="top:' + top + 'px;height:' + ht + 'px">' + esc(b[3]) + '</div>';
+          html += '<div class="tt-meal' + drag + '"' + attrs + ' style="top:' + top + 'px;height:' + ht + 'px">' + esc(b[3]) + rsz + '</div>';
         } else {
-          html += '<div class="tt-block" style="top:' + top + 'px;height:' + (ht - 4) + 'px;background:' + TT_COLORS[b[2]].bg + '">' +
-            '<div class="tt-t">' + esc(b[3]) + '</div>' + (b[4] ? '<div class="tt-s">' + esc(b[4]) + '</div>' : "") + '</div>';
+          html += '<div class="tt-block' + drag + '"' + attrs + ' style="top:' + top + 'px;height:' + (ht - 4) + 'px;background:' + TT_COLORS[b[2]].bg + '">' +
+            '<div class="tt-t">' + esc(b[3]) + '</div>' + (b[4] ? '<div class="tt-s">' + esc(b[4]) + '</div>' : "") + rsz + '</div>';
         }
       });
       html += '</div>';
@@ -1213,6 +1252,152 @@
     }
     var meta = document.getElementById("ttNow");
     if (meta) meta.textContent = "Now · " + now.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" }) + " · " + now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  }
+
+  /* ---- editing the timetable, Google-Calendar style (saves to this device) ---- */
+  var TT_CATS = [["morning","Morning pages"],["fitness","Fitness / Training"],["deep","Deep work"],["creative","Creative"],["apps","Applications"],["reading","Reading"],["rest","Rest & social"],["meal","Meal / break"]];
+  var TT_LONG = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  var TT_STEP = 0.25; // 15-minute snapping
+  var ttEditing = false, ttGesture = null;
+  var ttEl = document.getElementById("tt");
+  var ttEditBtn = document.getElementById("ttEditBtn");
+  var ttEditorEl = document.getElementById("ttEditor");
+
+  function dec2hhmm(d) { var h = Math.floor(d), m = Math.round((d - h) * 60); if (m === 60) { h++; m = 0; } return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m; }
+  function hhmm2dec(s) { var p = String(s).split(":"); return (parseInt(p[0], 10) || 0) + (parseInt(p[1], 10) || 0) / 60; }
+  function ensureEditable() { if (!state.timetable) state.timetable = JSON.parse(JSON.stringify(TT_SCHED)); }
+  function sortDay(d) { state.timetable[d].sort(function (a, b) { return a[0] - b[0]; }); }
+  function catColor(cat) { return cat === "meal" ? "#b8b0a3" : (TT_COLORS[cat] ? TT_COLORS[cat].bg : "#3d3a36"); }
+  function snap(t) { return Math.round(t / TT_STEP) * TT_STEP; }
+  function ttBody() { return ttEl.querySelector(".tt-body"); }
+  function yToTime(clientY) { var r = ttBody().getBoundingClientRect(); return TT_START + (clientY - r.top) / PPH; }
+  function xToDay(clientX) { var r = ttBody().getBoundingClientRect(); return Math.max(0, Math.min(6, Math.floor((clientX - r.left) / (r.width / 7)))); }
+
+  /* ---- pointer drag / resize / tap on the grid ---- */
+  function ttPointerDown(e) {
+    if (!ttEditing) return;
+    var resizeEl = e.target.closest(".tt-resize");
+    var blockEl = e.target.closest(".tt-block, .tt-meal");
+    var colEl = e.target.closest(".tt-col");
+    if (resizeEl && blockEl) {
+      var rd = +blockEl.getAttribute("data-day"), ri = +blockEl.getAttribute("data-idx");
+      ttGesture = { mode: "resize", day: rd, block: state.timetable[rd][ri], startX: e.clientX, startY: e.clientY, moved: false };
+      e.preventDefault();
+    } else if (blockEl) {
+      var bd = +blockEl.getAttribute("data-day"), bi = +blockEl.getAttribute("data-idx");
+      var blk = state.timetable[bd][bi];
+      ttGesture = { mode: "move", day: bd, block: blk, grab: yToTime(e.clientY) - blk[0], startX: e.clientX, startY: e.clientY, moved: false };
+      e.preventDefault();
+    } else if (colEl) {
+      ttGesture = { mode: "create", day: +colEl.getAttribute("data-day"), startTime: yToTime(e.clientY), startX: e.clientX, startY: e.clientY, moved: false };
+    } else { return; }
+    document.addEventListener("pointermove", ttPointerMove);
+    document.addEventListener("pointerup", ttPointerUp);
+  }
+  function ttPointerMove(e) {
+    if (!ttGesture) return;
+    var g = ttGesture;
+    if (!g.moved && Math.hypot(e.clientX - g.startX, e.clientY - g.startY) > 6) g.moved = true;
+    if (!g.moved) return;
+    if (g.mode === "create") { ttGesture = null; ttCleanupGesture(); return; } // a drag on empty space = let the page scroll
+    e.preventDefault();
+    if (g.mode === "move") {
+      var dur = g.block[1] - g.block[0];
+      var ns = snap(yToTime(e.clientY) - g.grab);
+      ns = Math.max(TT_START, Math.min(TT_END - dur, ns));
+      g.block[0] = ns; g.block[1] = ns + dur;
+      var nd = xToDay(e.clientX);
+      if (nd !== g.day) {
+        var arr = state.timetable[g.day], ix = arr.indexOf(g.block);
+        if (ix > -1) { arr.splice(ix, 1); state.timetable[nd].push(g.block); g.day = nd; }
+      }
+      buildTimetable();
+    } else if (g.mode === "resize") {
+      var ne = snap(yToTime(e.clientY));
+      ne = Math.max(g.block[0] + TT_STEP, Math.min(TT_END, ne));
+      g.block[1] = ne; buildTimetable();
+    }
+  }
+  function ttCleanupGesture() { document.removeEventListener("pointermove", ttPointerMove); document.removeEventListener("pointerup", ttPointerUp); }
+  function ttPointerUp() {
+    var g = ttGesture; ttGesture = null; ttCleanupGesture();
+    if (!g) return;
+    if (!g.moved) {
+      if (g.mode === "create") {
+        var s = Math.max(TT_START, Math.min(TT_END - 1, snap(g.startTime)));
+        var blk = [s, s + 1, "deep", "New block", ""];
+        state.timetable[g.day].push(blk); save(); buildTimetable(); openCard(blk, g.day);
+      } else {
+        openCard(g.block, g.day); buildTimetable();
+      }
+      return;
+    }
+    sortDay(g.day); save(); buildTimetable();
+  }
+  if (ttEl) ttEl.addEventListener("pointerdown", ttPointerDown);
+
+  /* ---- the edit card (tap a block to open) ---- */
+  var ttModal = document.createElement("div");
+  ttModal.className = "tt-modal"; ttModal.style.display = "none";
+  ttModal.innerHTML = '<div class="tt-card">' +
+    '<input class="fld" id="ttcTitle" placeholder="Title" autocomplete="off">' +
+    '<input class="fld" id="ttcSub" placeholder="Note (optional)" autocomplete="off">' +
+    '<div class="tt-card-times"><label>Start<input type="time" id="ttcStart"></label><label>End<input type="time" id="ttcEnd"></label></div>' +
+    '<div class="tt-card-daywrap"><label>Day<select id="ttcDay">' + TT_LONG.map(function (n, i) { return '<option value="' + i + '">' + n + '</option>'; }).join("") + '</select></label></div>' +
+    '<div class="tt-card-cats" id="ttcCats">' + TT_CATS.map(function (c) { return '<button type="button" class="tt-cat-pill" data-cat="' + c[0] + '"><span class="dot" style="background:' + catColor(c[0]) + '"></span>' + c[1] + '</button>'; }).join("") + '</div>' +
+    '<div class="tt-card-actions"><button type="button" class="tt-card-del" id="ttcDelete">Delete</button><button type="button" class="tt-card-done" id="ttcDone">Done</button></div>' +
+    '</div>';
+  document.body.appendChild(ttModal);
+  var ttcTitle = ttModal.querySelector("#ttcTitle"), ttcSub = ttModal.querySelector("#ttcSub"),
+      ttcStart = ttModal.querySelector("#ttcStart"), ttcEnd = ttModal.querySelector("#ttcEnd"),
+      ttcDay = ttModal.querySelector("#ttcDay"), ttcCats = ttModal.querySelector("#ttcCats");
+  var cardBlock = null, cardDay = 0;
+
+  function updateCatPills() { ttcCats.querySelectorAll(".tt-cat-pill").forEach(function (p) { p.classList.toggle("on", p.getAttribute("data-cat") === cardBlock[2]); }); }
+  function openCard(block, day) {
+    cardBlock = block; cardDay = day;
+    ttcTitle.value = block[3] || ""; ttcSub.value = block[4] || "";
+    ttcStart.value = dec2hhmm(block[0]); ttcEnd.value = dec2hhmm(block[1]); ttcDay.value = String(day);
+    updateCatPills(); ttModal.style.display = "flex";
+  }
+  function closeCard() { if (cardBlock) { sortDay(cardDay); save(); buildTimetable(); } cardBlock = null; ttModal.style.display = "none"; }
+
+  ttcTitle.addEventListener("input", function () { if (cardBlock) { cardBlock[3] = ttcTitle.value; save(); buildTimetable(); } });
+  ttcSub.addEventListener("input", function () { if (cardBlock) { cardBlock[4] = ttcSub.value; save(); buildTimetable(); } });
+  ttcStart.addEventListener("change", function () { if (!cardBlock) return; var v = Math.max(TT_START, Math.min(TT_END - TT_STEP, hhmm2dec(ttcStart.value))); cardBlock[0] = v; if (cardBlock[1] <= v) cardBlock[1] = Math.min(TT_END, v + TT_STEP); ttcStart.value = dec2hhmm(v); ttcEnd.value = dec2hhmm(cardBlock[1]); save(); buildTimetable(); });
+  ttcEnd.addEventListener("change", function () { if (!cardBlock) return; var v = Math.min(TT_END, hhmm2dec(ttcEnd.value)); if (v <= cardBlock[0]) v = Math.min(TT_END, cardBlock[0] + TT_STEP); cardBlock[1] = v; ttcEnd.value = dec2hhmm(v); save(); buildTimetable(); });
+  ttcDay.addEventListener("change", function () { if (!cardBlock) return; var nd = +ttcDay.value; if (nd !== cardDay) { var arr = state.timetable[cardDay], ix = arr.indexOf(cardBlock); if (ix > -1) { arr.splice(ix, 1); state.timetable[nd].push(cardBlock); } cardDay = nd; save(); buildTimetable(); } });
+  ttcCats.addEventListener("click", function (e) { var pill = e.target.closest(".tt-cat-pill"); if (!pill || !cardBlock) return; cardBlock[2] = pill.getAttribute("data-cat"); updateCatPills(); save(); buildTimetable(); });
+  ttModal.querySelector("#ttcDelete").addEventListener("click", function () { if (!cardBlock) return; var arr = state.timetable[cardDay], ix = arr.indexOf(cardBlock); if (ix > -1) arr.splice(ix, 1); cardBlock = null; ttModal.style.display = "none"; save(); buildTimetable(); });
+  ttModal.querySelector("#ttcDone").addEventListener("click", closeCard);
+  ttModal.addEventListener("click", function (e) { if (e.target === ttModal) closeCard(); });
+
+  /* ---- enter / leave edit mode ---- */
+  if (ttEditorEl) {
+    ttEditorEl.addEventListener("click", function (e) {
+      if (e.target.id === "ttResetAll" && window.confirm("Reset the whole week back to the original default timetable?")) {
+        state.timetable = JSON.parse(JSON.stringify(TT_SCHED)); save(); buildTimetable();
+      }
+    });
+  }
+  if (ttEditBtn && ttEl) {
+    ttEditBtn.onclick = function () {
+      ttEditing = !ttEditing;
+      if (ttEditing) {
+        ensureEditable();
+        ttEl.classList.add("editing");
+        ttEditorEl.innerHTML = '<div class="tt-edit-hint">Tap an empty slot to add &middot; tap a block to edit or delete &middot; drag to move &middot; drag the bottom edge to resize. Everything saves to this device.</div><button type="button" class="tt-reset-all" id="ttResetAll">Reset whole week to default</button>';
+        ttEditorEl.style.display = "";
+        ttEditBtn.textContent = "Done"; ttEditBtn.classList.add("on");
+      } else {
+        for (var d = 0; d < 7; d++) sortDay(d);
+        save();
+        ttEl.classList.remove("editing");
+        ttEditorEl.style.display = "none"; ttEditorEl.innerHTML = "";
+        ttEditBtn.textContent = "Edit"; ttEditBtn.classList.remove("on");
+      }
+      buildTimetable();
+    };
   }
 
   /* ==================================================================
